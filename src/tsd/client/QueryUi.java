@@ -97,6 +97,7 @@ public class QueryUi implements EntryPoint {
   private final ValidatedTextBox yformat = new ValidatedTextBox();
   private final ValidatedTextBox y2format = new ValidatedTextBox();
   private final ValidatedTextBox wxh = new ValidatedTextBox();
+  private final TextBox tz = new TextBox(); // change to ValidatedTextBox() later
 
   private String keypos = "";  // Position of the key on the graph.
   private final CheckBox horizontalkey = new CheckBox("Horizontal layout");
@@ -191,6 +192,8 @@ public class QueryUi implements EntryPoint {
     y2format.addKeyPressHandler(refreshgraph);
     wxh.addBlurHandler(refreshgraph);
     wxh.addKeyPressHandler(refreshgraph);
+    tz.addBlurHandler(refreshgraph);
+    tz.addKeyPressHandler(refreshgraph);
     horizontalkey.addClickHandler(refreshgraph);
     keybox.addClickHandler(refreshgraph);
     nokey.addClickHandler(refreshgraph);
@@ -230,6 +233,10 @@ public class QueryUi implements EntryPoint {
     wxh.setMaxLength(11);  // 99999x99999
     wxh.setText((Window.getClientWidth() - 20) + "x"
                 + (Window.getClientHeight() * 4 / 5));
+
+    tz.setVisibleLength(9);
+    tz.setMaxLength(30); // ls -1 /usr/share/zoneinfo/*/ | awk '{ print length, $0 }' | sort -n
+    tz.setText("Asia/Calcutta");
 
     final FlexTable table = new FlexTable();
     table.setText(0, 0, "From");
@@ -278,7 +285,13 @@ public class QueryUi implements EntryPoint {
       final HorizontalPanel hbox = new HorizontalPanel();
       hbox.add(new InlineLabel("WxH:"));
       hbox.add(wxh);
-      table.setWidget(0, 3, hbox);
+      table.setWidget(0, 4, hbox);
+    }
+    {
+      final HorizontalPanel hbox2 = new HorizontalPanel();
+      hbox2.add(new InlineLabel("Timezone:"));
+      hbox2.add(tz);
+      table.setWidget(0, 3, hbox2);
     }
     {
       final MetricForm.MetricChangeHandler metric_change_handler =
@@ -672,6 +685,7 @@ public class QueryUi implements EntryPoint {
       }
     }
     url.append("&wxh=").append(wxh.getText());
+    url.append("&tz=").append(tz.getText());
     final String uri = url.toString();
     if (uri.equals(lastgraphuri)) {
       return;  // Don't re-request the same graph.
