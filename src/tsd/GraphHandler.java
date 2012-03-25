@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.TimeZone;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
@@ -949,6 +950,7 @@ final class GraphHandler implements HttpRpc {
   private static long getQueryStringDate(final HttpQuery query,
                                          final String paramname) {
     final String date = query.getQueryStringParam(paramname);
+    final String tz = query.getQueryStringParam("tz");
     if (date == null) {
       return -1;
     } else if (date.endsWith("-ago")) {
@@ -966,6 +968,9 @@ final class GraphHandler implements HttpRpc {
     } else {  // => Nope, there is a slash, so parse a date then.
       try {
         final SimpleDateFormat fmt = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+        if (tz != null) {
+          fmt.setTimeZone(TimeZone.getTimeZone(tz));
+        }
         timestamp = fmt.parse(date).getTime() / 1000;
       } catch (ParseException e) {
         throw new BadRequestException("Invalid " + paramname + " date: " + date
