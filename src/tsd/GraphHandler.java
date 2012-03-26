@@ -950,7 +950,7 @@ final class GraphHandler implements HttpRpc {
   private static long getQueryStringDate(final HttpQuery query,
                                          final String paramname) {
     final String date = query.getQueryStringParam(paramname);
-    final String tz = query.getQueryStringParam("tz");
+    final int tzoffset = Integer.parseInt(query.getQueryStringParam("tzoffset"));
     if (date == null) {
       return -1;
     } else if (date.endsWith("-ago")) {
@@ -968,8 +968,9 @@ final class GraphHandler implements HttpRpc {
     } else {  // => Nope, there is a slash, so parse a date then.
       try {
         final SimpleDateFormat fmt = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-        if (tz != null) {
-          fmt.setTimeZone(TimeZone.getTimeZone(tz));
+        final String[] tzids = TimeZone.getAvailableIDs(tzoffset * (-1) * 60 * 1000);
+        if (tzids.length != 0) {
+          fmt.setTimeZone(TimeZone.getTimeZone(tzids[0]));
         }
         timestamp = fmt.parse(date).getTime() / 1000;
       } catch (ParseException e) {
